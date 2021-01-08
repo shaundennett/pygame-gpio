@@ -12,17 +12,21 @@ class GPIO():
         self.linked_pin = None
         self.xpos = 0
         self.ypos = 0
+        self.loc = 0
         self.set_x_and_y()
         self.current_state = 0
+
         pygame.font.init()
         self.myfont = pygame.font.SysFont('Courier', 12)
 
     def set_x_and_y(self):
 
         if self.is_even(self.pos):
-            self.xpos = 200
+            self.xpos = 800
+            self.loc = 1
         else:
             self.xpos = 100
+            self.loc = 0
         self.ypos = (math.floor((self.pos + 1) / 2) * 22)
 
     def is_even(self, val) -> bool:
@@ -32,7 +36,7 @@ class GPIO():
             return False
 
     def toString(self):
-        print(str(self.pos) + " : " + self.name + ": (" + str(self.xpos) + "," + str(self.ypos) + ")")
+        print(str(self.pos) + " : " + self.name + ": (" + str(self.xpos) + "," + str(self.ypos) + "),  " + str(self.loc))
 
     def update(self, screen: pygame.Surface):
         pygame.draw.circle(screen, (255, 255, 255), (self.xpos, self.ypos), 10)
@@ -49,7 +53,11 @@ class GPIO():
 
     def create_label(self,screen: pygame.Surface):
         textsurface = self.myfont.render(str(self.pos) + ":" + str(self.name), False, (50, 120, 120))
-        screen.blit(textsurface,(self.xpos -80, self.ypos - 5))
+
+        if self.loc == 0:
+            screen.blit(textsurface,(self.xpos - 80, self.ypos - 5))
+        else:
+            screen.blit(textsurface,(self.xpos + 20, self.ypos - 5))
 
 class gpio_pin(GPIO):
     def __init__(self, pos: int, name: str):
@@ -103,16 +111,20 @@ class component():
         elif self.type == 2:
             colour = (0, 255, 0)
 
-        pygame.draw.circle(screen, colour, (self.xpos, self.ypos), self.component_size, width=1)
-        pygame.draw.circle(screen, colour, (self.xpos - self.connector_relative_loc , self.ypos), self.connector_size, width=1)
-        pygame.draw.circle(screen, colour, (self.xpos + self.connector_relative_loc, self.ypos), self.connector_size, width=1)
-
+        pygame.draw.circle(screen, colour, (self.xpos, self.ypos), self.component_size, 1)
+        self.draw_input_connector(colour, screen)
+        self.draw_output_connector(colour, screen)
     def is_selected(self,x:int, y:int) -> bool:
         print(str(x) + " " + str(y))
 
         if self.type == 0 and abs(math.sqrt(pow(self.xpos - x, 2) + pow(self.ypos - y, 2))) <= self.component_size:
             print("IN")
             return True
+    def draw_input_connector(self,colour:(), screen:pygame.Surface):
+        pygame.draw.circle(screen, colour, (self.xpos , self.ypos - self.connector_relative_loc), self.connector_size, 1)
+    def draw_output_connector(self, colour:(), screen: pygame.Surface):
+        pygame.draw.circle(screen, colour, (self.xpos , self.ypos + self.connector_relative_loc), self.connector_size)
+
     def set_position(self,x:int,y:int):
         self.xpos = x
         self.ypos = y
