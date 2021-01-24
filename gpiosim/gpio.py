@@ -15,6 +15,7 @@ class GPIO():
         self.loc = 0
         self.set_x_and_y()
         self.current_state = 0
+        self.compomemt_size = 10
 
         pygame.font.init()
         self.myfont = pygame.font.SysFont('Courier', 12)
@@ -39,7 +40,11 @@ class GPIO():
         print(str(self.pos) + " : " + self.name + ": (" + str(self.xpos) + "," + str(self.ypos) + "),  " + str(self.loc))
 
     def update(self, screen: pygame.Surface):
-        pygame.draw.circle(screen, (255, 255, 255), (self.xpos, self.ypos), 10)
+        if self.mode == 0:
+           pygame.draw.circle(screen, (255, 255, 255), (self.xpos, self.ypos), 10)
+        else:
+            pygame.draw.circle(screen, (150, 0, 150), (self.xpos, self.ypos), 10)
+
         self.set_pin_colour(screen)
         self.create_label(screen)
 
@@ -59,6 +64,15 @@ class GPIO():
         else:
             screen.blit(textsurface,(self.xpos + 20, self.ypos - 5))
 
+    def is_selected(self, x: int, y: int) -> bool:
+        if self.type == 0 and self.distance_from_center(x, y) <= self.component_size:
+            return True
+        else:
+            return False
+
+    def distance_from_center(self, x: int, y: int) -> float:
+        return abs(math.sqrt(pow(self.xpos - x, 2) + pow(self.ypos - y, 2)))
+
 class gpio_pin(GPIO):
     def __init__(self, pos: int, name: str):
         super().__init__(pos, name)
@@ -66,6 +80,7 @@ class gpio_pin(GPIO):
         self.current_state = 0
         self.pin_type = 'gpio'
         self.mode = 0
+
 
 class gpio_5v(GPIO):
     def __init__(self, pos: int, name: str):
@@ -87,7 +102,16 @@ class gpio_gnd(GPIO):
         self.current_state = -1
         self.pin_type = 'gnd'
         self.mode = 0
+class connector():
+    def __init__(self,type:int):
+        self.type = type
+        self.source = None
+        self.value = 0
 
+class connection():
+    def _init__(self,source, target):
+        self.source = source
+        self.target = target
 
 class component():
     def __init__(self, name:str, type:int, xpos:int, ypos:int):
@@ -102,6 +126,7 @@ class component():
         self.connector_size = 6
         self.connector_relative_loc = (self.component_size) + (self.connector_size)
         self.type = type
+
     def update(self, screen:pygame.Surface):
         colour = (0,0,0)
         if self.type == 0:
@@ -114,19 +139,29 @@ class component():
         pygame.draw.circle(screen, colour, (self.xpos, self.ypos), self.component_size, 1)
         self.draw_input_connector(colour, screen)
         self.draw_output_connector(colour, screen)
-    def is_selected(self,x:int, y:int) -> bool:
-        print(str(x) + " " + str(y))
 
-        if self.type == 0 and abs(math.sqrt(pow(self.xpos - x, 2) + pow(self.ypos - y, 2))) <= self.component_size:
-            print("IN")
+    def is_selected(self,x:int, y:int) -> bool:
+        if self.type == 0 and self.distance_from_center(x,y) <= self.component_size:
             return True
-    def draw_input_connector(self,colour:(), screen:pygame.Surface):
-        pygame.draw.circle(screen, colour, (self.xpos , self.ypos - self.connector_relative_loc), self.connector_size, 1)
-    def draw_output_connector(self, colour:(), screen: pygame.Surface):
-        pygame.draw.circle(screen, colour, (self.xpos , self.ypos + self.connector_relative_loc), self.connector_size)
+        else:
+            return False
+
+    def draw_input_connector(self, colour: (), screen: pygame.Surface):
+        pygame.draw.circle(screen, colour, (self.xpos, self.ypos - self.connector_relative_loc), self.connector_size, 1)
+
+    def draw_output_connector(self, colour: (), screen: pygame.Surface):
+        pygame.draw.circle(screen, colour, (self.xpos, self.ypos + self.connector_relative_loc), self.connector_size)
+
+    def distance_from_center(self, x:int, y:int) -> float:
+        return abs(math.sqrt(pow(self.xpos - x, 2) + pow(self.ypos - y, 2)))
 
     def set_position(self,x:int,y:int):
         self.xpos = x
         self.ypos = y
 
-
+    def is_overlapping(self,comp) -> bool:
+        print(str(self.component_size + (self.connector_size * 2)) + "::" + str(self.distance_from_center(comp.xpos, comp.ypos)))
+        if self.distance_from_center(comp.xpos,comp.ypos) > (self.component_size + (self.connector_size * 2)) * 2 :
+            return False
+        else:
+            return True

@@ -80,3 +80,9 @@ class gpio_model():
         self.abandon_transient_component()
     def abandon_transient_component(self):
         self.transient_component = None
+
+    def component_collision(self) -> bool:
+        for comp in self.all_components:
+            if comp.is_overlapping(self.transient_component) == True:
+                return True
+        return False
