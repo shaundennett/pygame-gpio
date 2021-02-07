@@ -55,6 +55,8 @@ class gpio_model():
         self.all_components = []
         self.transient_component = None
         self.all_connections = []
+        self.transient_connection = None
+
 
 
     def toString(self):
@@ -104,3 +106,22 @@ class gpio_model():
             result = comp.check_connector(x,y)
             if type(result) == gpio.Connector:
                 return result
+
+    def create_transient_connection(self,start_connector:gpio.Connector):
+        self.transient_connection = gpio.Connection(gpio.Connector(),None)
+
+    def find_connection(self):
+        pass
+
+    def get_transient_connection(self):
+        pass
+
+    def convert_transient_connection(self):
+        pass
+
+    def add_connection(self,connection:gpio.Connection):
+        pass
+
+    def remove_connection(self, connection: gpio.Connection):
+        pass
+
