@@ -54,10 +54,13 @@ class gpio_model():
 
         self.all_components = []
         self.transient_component = None
+        self.all_connections = []
+
 
     def toString(self):
         for pin in self.pins.values():
             pin.toString()
+
     def update(self,screen: pygame.Surface):
         #pygame.draw.circle(screen, (255, 255, 255), (200, 50), 30)
         for pin in self.pins.values():
@@ -73,11 +76,15 @@ class gpio_model():
         self.pins[id].type = type
 
     def start_create_transient_component(self, x:int, y:int, name:str ):
-        self.transient_component = gpio.component("first",1,x,y)
+        self.transient_component = gpio.component("temp",1,x,y)
+
     def place_transient_component(self):
         self.transient_component.type = 2
+        self.transient_component.name = str(len(self.all_components)+1)
         self.all_components.append(self.transient_component)
         self.abandon_transient_component()
+
+
     def abandon_transient_component(self):
         self.transient_component = None
 
@@ -86,3 +93,14 @@ class gpio_model():
             if comp.is_overlapping(self.transient_component) == True:
                 return True
         return False
+
+    def check_connectors(self,x:int,y:int) -> gpio.Connector:
+        for comp in self.all_components:
+            result = comp.check_connector(x,y)
+            if type(result) == gpio.Connector:
+                return result
+
+        for pin in self.pins.values():
+            result = comp.check_connector(x,y)
+            if type(result) == gpio.Connector:
+                return result
