@@ -9,3 +9,4 @@ y2=100
 
 print(pow(x1-x2 ,2))
 print(abs(math.sqrt(pow(x1-x2,2) + pow(y1-y2,2))))
+#test
